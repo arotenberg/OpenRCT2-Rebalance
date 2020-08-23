@@ -1584,6 +1584,19 @@ loc_69B119:
         if (itemValue < price)
         {
             itemValue -= price;
+#ifdef RCT2_REBALANCE
+            itemValue = -itemValue;
+
+            /*
+             * Guests are now merely willing to pay more money for an umbrella when it is raining,
+             * rather than willing to pay an unbounded amount of money.
+             */
+            if (shopItem == SHOP_ITEM_UMBRELLA)
+            {
+                if (climate_is_raining())
+                    itemValue /= 2;
+            }
+#else
             if (shopItem == SHOP_ITEM_UMBRELLA)
             {
                 if (climate_is_raining())
@@ -1591,6 +1604,7 @@ loc_69B119:
             }
 
             itemValue = -itemValue;
+#endif
             if (Happiness >= 128)
                 itemValue /= 2;
 
@@ -1630,7 +1644,9 @@ loc_69B119:
         }
     }
 
+#ifndef RCT2_REBALANCE
 loc_69B221:
+#endif
     if (!hasVoucher)
     {
         if (gClimateCurrent.Temperature >= 21)
@@ -6211,6 +6227,23 @@ static void peep_update_walking_break_scenery(Peep* peep)
     if (gCheatsDisableVandalism)
         return;
 
+#ifdef RCT2_REBALANCE
+    /*
+     * Revised vandalism logic - makes vandalism possible even when paths are clean. This is an
+     * indirect buff to security guards, who are almost completely useless in vanilla RCT2.
+     */
+    if (peep->State != PEEP_STATE_WALKING)
+        return;
+    if (!(peep->PeepFlags & PEEP_FLAGS_ANGRY))  // used for Easter egg guest name
+    {
+        unsigned int vandalismProb = 1;  // tiny but nonzero probability of a happy guest vandalizing
+        if (peep->Happiness < 48)  // vandalism gets more likely as the guest gets unhappier
+            vandalismProb += 70 * (48 - peep->Happiness);
+
+        if ((scenario_rand() & 0xFFFF) >= vandalismProb)
+            return;
+    }
+#else
     if (!(peep->PeepFlags & PEEP_FLAGS_ANGRY))
     {
         if (peep->Happiness >= 48)
@@ -6226,6 +6259,7 @@ static void peep_update_walking_break_scenery(Peep* peep)
         if ((scenario_rand() & 0xFFFF) > 3276)
             return;
     }
+#endif
 
     if (peep->GetNextIsSurface())
         return;

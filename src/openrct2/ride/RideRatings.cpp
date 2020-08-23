@@ -1447,7 +1447,12 @@ static int32_t ride_ratings_get_scenery_score(Ride* ride)
     // Check if station is underground, returns a fixed mediocre score since you can't have scenery underground
     if (z > ride->stations[stationIndex].GetBaseZ())
     {
+#ifdef RCT2_REBALANCE
+        // Underground stations are awesome! Who isn't excited to go underground to get on a ride?
+        return 100;
+#else
         return 40;
+#endif
     }
 
     // Count surrounding scenery items
@@ -2816,8 +2821,14 @@ void ride_ratings_calculate_ferris_wheel(Ride* ride)
     set_unreliability_factor(ride);
 
     RatingTuple ratings;
+#ifdef RCT2_REBALANCE
+    // Ever been on a Ferris wheel? They're pretty freaky if you're sensitive to heights!
+    ride_ratings_set(&ratings, RIDE_RATING(0, 90), RIDE_RATING(0, 70), RIDE_RATING(0, 30));
+    ride_ratings_apply_rotations(&ratings, ride, 40, 40, 25);
+#else
     ride_ratings_set(&ratings, RIDE_RATING(0, 60), RIDE_RATING(0, 25), RIDE_RATING(0, 30));
     ride_ratings_apply_rotations(&ratings, ride, 25, 25, 25);
+#endif
     ride_ratings_apply_scenery(&ratings, ride, 41831);
     ride_ratings_apply_intensity_penalty(&ratings);
     ride_ratings_apply_adjustments(ride, &ratings);
@@ -3417,9 +3428,19 @@ void ride_ratings_calculate_heartline_twister_coaster(Ride* ride)
     ride_ratings_apply_max_speed(&ratings, ride, 97418, 123987, 70849);
     ride_ratings_apply_average_speed(&ratings, ride, 291271, 436906);
     ride_ratings_apply_duration(&ratings, ride, 150, 26214);
+#ifdef RCT2_REBALANCE
+    /*
+     * Replace some of the terrible stats of the heartline twister coaster in vanilla RCT2 with
+     * stats swiped from the extremely good giga coaster.
+     */
+    ride_ratings_apply_gforces(&ratings, ride, 36864, 30384, 49648);
+    ride_ratings_apply_turns(&ratings, ride, 28235, 34767, 45749);
+    ride_ratings_apply_drops(&ratings, ride, 43690, 46811, 49152);
+#else
     ride_ratings_apply_gforces(&ratings, ride, 24576, 44683, 89367);
     ride_ratings_apply_turns(&ratings, ride, 26749, 52150, 57186);
     ride_ratings_apply_drops(&ratings, ride, 29127, 53052, 55705);
+#endif
     ride_ratings_apply_sheltered_ratings(&ratings, ride, 15420, 34952, 35108);
     ride_ratings_apply_proximity(&ratings, 9841);
     ride_ratings_apply_scenery(&ratings, ride, 3904);

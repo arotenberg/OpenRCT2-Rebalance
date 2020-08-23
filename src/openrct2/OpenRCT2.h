@@ -13,6 +13,8 @@
 
 #include <string>
 
+#define RCT2_REBALANCE
+
 enum class StartupAction
 {
     None,
