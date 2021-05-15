@@ -950,6 +950,24 @@ void Peep::UpdateFalling()
         if (z <= 1)
         {
             // Remove peep if it has gone to the void
+#ifdef RCT2_REBALANCE
+            /*
+             * Vanilla RCT2 silently removes peeps that fall into the void. This can be abused by
+             * building a ride exit underground with no exit path. This sends a continuous stream
+             * of peeps into the void, removing them from the park (and thereby allowing guests
+             * with fresh wallets to enter the park) without waiting for them to leave the park
+             * voluntarily and without getting a park rating penalty for killing guests. We change
+             * this behavior so that dropping a peep into the void counts the same as drowning it.
+             */
+            if (gConfigNotifications.guest_died)
+            {
+                auto ft = Formatter::Common();
+                FormatNameTo(ft);
+                News::AddItemToQueue(News::ItemType::Blank, STR_NEWS_ITEM_GUEST_DROWNED, x | (y << 16));
+            }
+
+            gParkRatingCasualtyPenalty = std::min(gParkRatingCasualtyPenalty + 25, 1000);
+#endif
             Remove();
             return;
         }

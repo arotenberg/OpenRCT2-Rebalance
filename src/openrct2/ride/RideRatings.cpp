@@ -4132,7 +4132,16 @@ void ride_ratings_calculate_submarine_ride(Ride* ride)
     // NOTE Fixed bug from original game, see boat Hire.
 
     RatingTuple ratings;
+#ifdef RCT2_REBALANCE
+    /*
+     * Small, enclosed underwater ride... that should be a bit exciting even if it's slow, right?
+     * Besides, these things are inconvenient to build, so we should reward players for figuring
+     * out a place to put them in an actual park
+     */
+    ride_ratings_set(&ratings, RIDE_RATING(3, 00), RIDE_RATING(2, 00), RIDE_RATING(1, 20));
+#else
     ride_ratings_set(&ratings, RIDE_RATING(2, 20), RIDE_RATING(1, 80), RIDE_RATING(1, 40));
+#endif
     ride_ratings_apply_length(&ratings, ride, 6000, 764);
     ride_ratings_apply_proximity(&ratings, 11183);
     ride_ratings_apply_scenery(&ratings, ride, 22310);
